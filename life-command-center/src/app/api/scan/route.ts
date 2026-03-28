@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { scanGmail } from '@/lib/gmail';
 import { classifyEmail, isSpam } from '@/lib/classifier';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST() {
   const session = await getServerSession();
   if (!session) {
