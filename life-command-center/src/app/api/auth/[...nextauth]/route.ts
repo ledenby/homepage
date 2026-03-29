@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
 const handler = NextAuth({
+  debug: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -17,6 +18,9 @@ const handler = NextAuth({
   ],
   session: {
     strategy: 'jwt',
+  },
+  pages: {
+    error: '/api/auth/debug-error',
   },
   callbacks: {
     async jwt({ token, account }) {
