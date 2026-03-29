@@ -38,7 +38,24 @@ export interface SchoolEventType {
   type: string;
 }
 
-export type TabId = 'now' | 'tracker' | 'school' | 'kids' | 'bills' | 'other' | 'ideas';
+export type TabId = 'now' | 'tracker' | 'school' | 'kids' | 'bills' | 'other' | 'ideas' | 'uploads';
+
+export interface GmailAccountType {
+  id: string;
+  email: string;
+  lastScanAt: string | null;
+  isActive: boolean;
+}
+
+export interface UploadType {
+  id: string;
+  filename: string;
+  url: string;
+  caption: string;
+  category: string;
+  notes: string;
+  createdAt: string;
+}
 
 export interface TrackerStatus {
   label: string;
