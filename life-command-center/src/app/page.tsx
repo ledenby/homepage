@@ -5,8 +5,10 @@ import Header from '@/components/Header';
 import UrgentTab from '@/components/UrgentTab';
 import TrackerTab from '@/components/TrackerTab';
 import SchoolTab from '@/components/SchoolTab';
+import CheerTab from '@/components/CheerTab';
 import EmailResultsTab from '@/components/EmailResultsTab';
 import UploadsTab from '@/components/UploadsTab';
+import MealsTab from '@/components/MealsTab';
 import IdeasTab from '@/components/IdeasTab';
 import { TabId } from '@/types';
 
@@ -14,9 +16,11 @@ const tabs: { id: TabId; label: string; icon: string }[] = [
   { id: 'now', label: 'Now', icon: '⚡' },
   { id: 'tracker', label: 'Tracker', icon: '📋' },
   { id: 'school', label: 'School', icon: '📚' },
-  { id: 'kids', label: 'Kids', icon: '🎀' },
+  { id: 'cheer', label: 'Cheer', icon: '🎀' },
+  { id: 'kids', label: 'Kids', icon: '👧' },
   { id: 'bills', label: 'Bills', icon: '💰' },
   { id: 'uploads', label: 'Uploads', icon: '📸' },
+  { id: 'meals', label: 'Meals', icon: '🍽️' },
   { id: 'other', label: 'Other', icon: '📌' },
   { id: 'ideas', label: 'Ideas', icon: '💡' },
 ];
@@ -61,9 +65,11 @@ export default function Home() {
           {activeTab === 'now' && <UrgentTab />}
           {activeTab === 'tracker' && <TrackerTab />}
           {activeTab === 'school' && <SchoolTab />}
+          {activeTab === 'cheer' && <CheerTab />}
           {activeTab === 'kids' && <EmailResultsTab category="kids" />}
           {activeTab === 'bills' && <EmailResultsTab category="bills" />}
           {activeTab === 'uploads' && <UploadsTab />}
+          {activeTab === 'meals' && <MealsTab />}
           {activeTab === 'other' && (
             <div className="space-y-4">
               <EmailResultsTab category="medical" />

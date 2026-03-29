@@ -38,7 +38,7 @@ export interface SchoolEventType {
   type: string;
 }
 
-export type TabId = 'now' | 'tracker' | 'school' | 'kids' | 'bills' | 'other' | 'ideas' | 'uploads';
+export type TabId = 'now' | 'tracker' | 'school' | 'cheer' | 'kids' | 'bills' | 'uploads' | 'meals' | 'other' | 'ideas';
 
 export interface GmailAccountType {
   id: string;

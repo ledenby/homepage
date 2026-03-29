@@ -39,9 +39,27 @@ const SPAM_KEYWORDS = [
   'unsubscribe', 'marketing', 'promotional', 'newsletter',
   'bill collector', 'account in default', 'wage garnishment',
   'pre-approved', 'refinance offer', 'survey invitation',
+  'recruiting', 'job opportunity', 'career opportunity', 'we are hiring',
+  'talent acquisition', 'staffing', 'headhunter', 'job alert',
+  'apply now', 'job opening', 'resume', 'we found your resume',
+  'credit score', 'credit repair', 'consolidation', 'settlement offer',
+  'payment plan offer', 'collections agency', 'overdue account',
+  'urgent response required', 'debt relief', 'loan offer', 'cash advance',
+  'account suspended', 'verify your account', 'wire transfer',
+  'weight loss', 'discount code', 'coupon', 'deal of the day',
+  'buy now', 'order now', 'special offer', 'exclusive deal',
+  'earn money', 'work from home', 'click here', 'free gift',
+  'you have been selected', 'winner', 'inheritance', 'beneficiary',
+  'collections department', 'legal action', 'warrant',
 ];
 
-const SPAM_DOMAINS = ['fundflippr.com', 'breatheasyloans.com', 'cashlantic.com'];
+const SPAM_DOMAINS = [
+  'fundflippr.com', 'breatheasyloans.com', 'cashlantic.com',
+  'jobcase.com', 'ziprecruiter.com', 'indeed.com', 'glassdoor.com',
+  'linkedin.com', 'monster.com', 'careerbuilder.com',
+  'jobrapido.com', 'creditkarma.com', 'lendingtree.com', 'quickenloans.com',
+  'noreply@marketing', 'promo@', 'deals@', 'offers@',
+];
 
 export function classifyEmail(subject: string, snippet: string, from: string): string {
   const text = `${subject} ${snippet} ${from}`.toLowerCase();
