@@ -23,8 +23,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      return NextResponse.json({ error: 'Blob storage not configured. Set BLOB_READ_WRITE_TOKEN in Vercel env vars.' }, { status: 500 });
+    }
+
     const blob = await put(file.name, file, {
       access: 'public',
+      token,
     });
 
     const upload = await prisma.upload.create({
@@ -51,7 +57,7 @@ export async function DELETE(req: NextRequest) {
   const upload = await prisma.upload.findUnique({ where: { id } });
   if (upload) {
     try {
-      await del(upload.url);
+      await del(upload.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
     } catch {
       // Blob may already be deleted
     }
