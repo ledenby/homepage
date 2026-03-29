@@ -59,6 +59,7 @@ export default function UploadsTab() {
 
     try {
       const res = await fetch('/api/uploads', { method: 'POST', body: formData });
+      const data = await res.json();
       if (res.ok) {
         setSelectedFile(null);
         setPreview(null);
@@ -67,9 +68,11 @@ export default function UploadsTab() {
         setNotes('');
         setShowForm(false);
         fetchUploads();
+      } else {
+        alert('Upload failed: ' + (data.error || 'Unknown error'));
       }
-    } catch {
-      alert('Upload failed');
+    } catch (err: any) {
+      alert('Upload failed: ' + (err.message || 'Network error'));
     } finally {
       setUploading(false);
     }
