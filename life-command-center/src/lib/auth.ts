@@ -1,8 +1,8 @@
 import GoogleProvider from 'next-auth/providers/google';
 import type { NextAuthOptions } from 'next-auth';
+import { prisma } from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
-  debug: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -20,9 +20,32 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, profile }) {
       if (account) {
         token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+
+        // Save/update Gmail account in database
+        const email = (profile as any)?.email || token.email;
+        if (email) {
+          try {
+            await prisma.gmailAccount.upsert({
+              where: { email },
+              update: {
+                accessToken: account.access_token || null,
+                refreshToken: account.refresh_token || null,
+                isActive: true,
+              },
+              create: {
+                email,
+                accessToken: account.access_token || null,
+                refreshToken: account.refresh_token || null,
+              },
+            });
+          } catch {
+            // Don't block auth if DB save fails
+          }
+        }
       }
       return token;
     },

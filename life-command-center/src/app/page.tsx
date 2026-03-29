@@ -6,6 +6,7 @@ import UrgentTab from '@/components/UrgentTab';
 import TrackerTab from '@/components/TrackerTab';
 import SchoolTab from '@/components/SchoolTab';
 import EmailResultsTab from '@/components/EmailResultsTab';
+import UploadsTab from '@/components/UploadsTab';
 import IdeasTab from '@/components/IdeasTab';
 import { TabId } from '@/types';
 
@@ -15,6 +16,7 @@ const tabs: { id: TabId; label: string; icon: string }[] = [
   { id: 'school', label: 'School', icon: '📚' },
   { id: 'kids', label: 'Kids', icon: '🎀' },
   { id: 'bills', label: 'Bills', icon: '💰' },
+  { id: 'uploads', label: 'Uploads', icon: '📸' },
   { id: 'other', label: 'Other', icon: '📌' },
   { id: 'ideas', label: 'Ideas', icon: '💡' },
 ];
@@ -61,6 +63,7 @@ export default function Home() {
           {activeTab === 'school' && <SchoolTab />}
           {activeTab === 'kids' && <EmailResultsTab category="kids" />}
           {activeTab === 'bills' && <EmailResultsTab category="bills" />}
+          {activeTab === 'uploads' && <UploadsTab />}
           {activeTab === 'other' && (
             <div className="space-y-4">
               <EmailResultsTab category="medical" />

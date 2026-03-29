@@ -61,8 +61,9 @@ model ScannedEmail {
   emailDate  DateTime
   category   String
   isSpam     Boolean  @default(false)
-  scanBatch  String
-  scannedAt  DateTime @default(now())
+  scanBatch   String
+  sourceEmail String   @default("")
+  scannedAt   DateTime @default(now())
 }
 
 model RecurringItem {
@@ -96,4 +97,24 @@ model SchoolEvent {
   source      String @default("")
   type        String @default("event")
   sortKey     String @default("")
+}
+
+model GmailAccount {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  accessToken  String?
+  refreshToken String?
+  addedAt      DateTime @default(now())
+  lastScanAt   DateTime?
+  isActive     Boolean  @default(true)
+}
+
+model Upload {
+  id          String   @id @default(cuid())
+  filename    String
+  url         String
+  caption     String   @default("")
+  category    String   @default("general")
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
 }
