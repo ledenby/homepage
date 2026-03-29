@@ -174,7 +174,7 @@ export default function UploadsTab() {
           {uploads.map((upload) => (
             <div key={upload.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <img
-                src={upload.url}
+                src={`/api/uploads/image?url=${encodeURIComponent(upload.url)}`}
                 alt={upload.caption}
                 className="w-full h-32 object-cover"
               />
