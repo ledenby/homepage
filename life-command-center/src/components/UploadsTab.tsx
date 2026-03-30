@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { upload } from '@vercel/blob/client';
 import { UploadType } from '@/types';
 
 const categories = [
@@ -53,25 +52,28 @@ export default function UploadsTab() {
     setUploading(true);
 
     try {
-      // Step 1: Upload file directly to Vercel Blob from the browser
-      const blob = await upload(selectedFile.name, selectedFile, {
-        access: 'public',
-        handleUploadUrl: '/api/uploads/token',
-      });
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('caption', caption);
+      formData.append('category', category);
+      formData.append('notes', notes);
 
-      // Step 2: Save metadata to our database
       const res = await fetch('/api/uploads', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: blob.url,
-          filename: selectedFile.name,
-          caption,
-          category,
-          notes,
-        }),
+        body: formData,
       });
-      const data = await res.json();
+
+      // Handle non-JSON responses (e.g. Vercel error pages)
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        alert('Upload failed: Server returned unexpected response. Status: ' + res.status);
+        setUploading(false);
+        return;
+      }
+
       if (res.ok) {
         setSelectedFile(null);
         setPreview(null);
@@ -81,10 +83,10 @@ export default function UploadsTab() {
         setShowForm(false);
         fetchUploads();
       } else {
-        alert('Save failed: ' + JSON.stringify(data));
+        alert('Upload failed: ' + (data.error || JSON.stringify(data)));
       }
     } catch (err: any) {
-      alert('Upload error: ' + (err.message || 'Unknown error'));
+      alert('Upload error: ' + (err.message || 'Network error'));
     } finally {
       setUploading(false);
     }

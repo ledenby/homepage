@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { del } from '@vercel/blob';
+import { put, del } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,16 +13,53 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { url, filename, caption = '', category = 'general', notes = '' } = await req.json();
+    const contentType = req.headers.get('content-type') || '';
 
-    if (!url) {
-      return NextResponse.json({ error: 'No blob URL provided' }, { status: 400 });
+    // Handle JSON body (metadata-only save from client upload)
+    if (contentType.includes('application/json')) {
+      const { url, filename, caption = '', category = 'general', notes = '' } = await req.json();
+      if (!url) {
+        return NextResponse.json({ error: 'No blob URL provided' }, { status: 400 });
+      }
+      const upload = await prisma.upload.create({
+        data: { filename: filename || 'upload', url, caption, category, notes },
+      });
+      return NextResponse.json(upload);
     }
+
+    // Handle FormData (server-side blob upload)
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
+    const caption = (formData.get('caption') as string) || '';
+    const category = (formData.get('category') as string) || 'general';
+    const notes = (formData.get('notes') as string) || '';
+
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    }
+
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      return NextResponse.json({ error: 'Blob storage not configured' }, { status: 500 });
+    }
+
+    // Read file into buffer to avoid streaming issues
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const safeName = `uploads/upload-${Date.now()}.${ext}`;
+
+    const blob = await put(safeName, buffer, {
+      access: 'public',
+      token,
+      contentType: file.type || 'image/jpeg',
+    });
 
     const upload = await prisma.upload.create({
       data: {
-        filename: filename || 'upload',
-        url,
+        filename: file.name,
+        url: blob.url,
         caption,
         category,
         notes,
@@ -31,7 +68,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(upload);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Save failed' }, { status: 500 });
+    return NextResponse.json({
+      error: error.message || 'Upload failed',
+      type: error.name,
+    }, { status: 500 });
   }
 }
 
