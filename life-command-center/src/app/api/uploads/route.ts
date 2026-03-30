@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Blob storage not configured. Set BLOB_READ_WRITE_TOKEN in Vercel env vars.' }, { status: 500 });
     }
 
-    const blob = await put(file.name, file, {
+    // Sanitize filename: remove special chars, spaces, and ensure valid extension
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const safeName = `upload-${Date.now()}.${ext}`;
+
+    const blob = await put(safeName, file, {
       access: 'private',
       token,
     });
