@@ -51,14 +51,26 @@ export default function UploadsTab() {
     if (!selectedFile) return;
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('caption', caption);
-    formData.append('category', category);
-    formData.append('notes', notes);
-
     try {
-      const res = await fetch('/api/uploads', { method: 'POST', body: formData });
+      // Convert file to base64 to avoid iOS Safari FormData issues
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
+
+      const res = await fetch('/api/uploads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file: base64,
+          filename: selectedFile.name,
+          caption,
+          category,
+          notes,
+        }),
+      });
       const data = await res.json();
       if (res.ok) {
         setSelectedFile(null);
@@ -72,7 +84,7 @@ export default function UploadsTab() {
         alert('Upload failed: ' + JSON.stringify(data));
       }
     } catch (err: any) {
-      alert('Upload failed: ' + (err.message || 'Network error'));
+      alert('Upload error: ' + err.name + ': ' + err.message);
     } finally {
       setUploading(false);
     }
