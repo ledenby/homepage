@@ -49,7 +49,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(upload);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Upload failed' }, { status: 500 });
+    return NextResponse.json({
+      error: error.message || 'Upload failed',
+      name: error.name,
+      code: error.code,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n'),
+    }, { status: 500 });
   }
 }
 

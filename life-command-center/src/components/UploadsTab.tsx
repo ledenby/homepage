@@ -69,7 +69,7 @@ export default function UploadsTab() {
         setShowForm(false);
         fetchUploads();
       } else {
-        alert('Upload failed: ' + (data.error || 'Unknown error'));
+        alert('Upload failed: ' + JSON.stringify(data));
       }
     } catch (err: any) {
       alert('Upload failed: ' + (err.message || 'Network error'));
