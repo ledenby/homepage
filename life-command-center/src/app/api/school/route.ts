@@ -32,6 +32,21 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(event);
 }
 
+export async function PUT(req: NextRequest) {
+  const body = await req.json();
+  const event = await prisma.schoolEvent.update({
+    where: { id: body.id },
+    data: {
+      dateDisplay: body.dateDisplay,
+      eventText: body.eventText,
+      source: body.source,
+      type: body.type,
+      sortKey: body.sortKey,
+    },
+  });
+  return NextResponse.json(event);
+}
+
 export async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');

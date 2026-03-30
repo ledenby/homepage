@@ -47,13 +47,62 @@ export default function UploadsTab() {
     }
   };
 
+  // Compress image to fit under Vercel's 4.5MB body limit
+  const compressImage = (file: File, maxSizeMB: number = 3): Promise<Blob> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Scale down if larger than 1600px on any side
+        let { width, height } = img;
+        const maxDim = 1600;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Try different quality levels until under size limit
+        const tryQuality = (quality: number) => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob && (blob.size <= maxSizeMB * 1024 * 1024 || quality <= 0.3)) {
+                resolve(blob);
+              } else {
+                tryQuality(quality - 0.1);
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        tryQuality(0.8);
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
     setUploading(true);
 
     try {
+      // Compress image to stay under Vercel's 4.5MB body size limit
+      const compressed = await compressImage(selectedFile);
+      const compressedFile = new File([compressed], selectedFile.name.replace(/\.\w+$/, '.jpg'), {
+        type: 'image/jpeg',
+      });
+
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append('file', compressedFile);
       formData.append('caption', caption);
       formData.append('category', category);
       formData.append('notes', notes);
