@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { EmailResult } from '@/types';
+import { generateIcsUrl } from '@/lib/calendar';
 
 const categoryConfig: Record<string, { label: string; icon: string; color: string }> = {
   kids: { label: 'Kids & Activities', icon: '🎀', color: 'border-pink-400 bg-pink-50' },
@@ -85,12 +86,37 @@ export default function EmailResultsTab({ category }: { category?: string }) {
               <div className="divide-y divide-gray-100">
                 {catEmails.map((email) => (
                   <div key={email.id} className="p-3 pl-12">
-                    <p className="font-body text-sm font-medium text-navy truncate">{email.subject}</p>
-                    <p className="font-body text-xs text-gray-400 mt-0.5">{email.fromAddr}</p>
-                    <p className="font-body text-xs text-gray-500 mt-1 line-clamp-2">{email.snippet}</p>
-                    <p className="font-body text-[10px] text-gray-300 mt-1">
-                      {new Date(email.emailDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </p>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-body text-sm font-medium text-navy truncate">{email.subject}</p>
+                        <p className="font-body text-xs text-gray-400 mt-0.5">{email.fromAddr}</p>
+                        <p className="font-body text-xs text-gray-500 mt-1 line-clamp-2">{email.snippet}</p>
+                        <p className="font-body text-[10px] text-gray-300 mt-1">
+                          {new Date(email.emailDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const url = generateIcsUrl(
+                            email.subject,
+                            new Date(email.emailDate),
+                            `From: ${email.fromAddr}\n${email.snippet}`,
+                            true
+                          );
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = 'event.ics';
+                          link.click();
+                        }}
+                        className="text-gray-300 hover:text-coral transition-colors flex-shrink-0 p-1 mt-1"
+                        title="Add to Calendar"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
