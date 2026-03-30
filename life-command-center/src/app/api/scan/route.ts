@@ -125,8 +125,14 @@ export async function POST() {
 }
 
 export async function GET() {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
   const emails = await prisma.scannedEmail.findMany({
-    where: { isSpam: false },
+    where: {
+      isSpam: false,
+      emailDate: { gte: thirtyDaysAgo },
+    },
     orderBy: { emailDate: 'desc' },
   });
   return NextResponse.json(emails);
