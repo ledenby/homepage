@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { upload } from '@vercel/blob/client';
 import { UploadType } from '@/types';
 
 const categories = [
@@ -52,19 +53,18 @@ export default function UploadsTab() {
     setUploading(true);
 
     try {
-      // Convert file to base64 to avoid iOS Safari FormData issues
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(selectedFile);
+      // Step 1: Upload file directly to Vercel Blob from the browser
+      const blob = await upload(selectedFile.name, selectedFile, {
+        access: 'public',
+        handleUploadUrl: '/api/uploads/token',
       });
 
+      // Step 2: Save metadata to our database
       const res = await fetch('/api/uploads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          file: base64,
+          url: blob.url,
           filename: selectedFile.name,
           caption,
           category,
@@ -81,10 +81,10 @@ export default function UploadsTab() {
         setShowForm(false);
         fetchUploads();
       } else {
-        alert('Upload failed: ' + JSON.stringify(data));
+        alert('Save failed: ' + JSON.stringify(data));
       }
     } catch (err: any) {
-      alert('Upload error: ' + err.name + ': ' + err.message);
+      alert('Upload error: ' + (err.message || 'Unknown error'));
     } finally {
       setUploading(false);
     }
@@ -186,7 +186,7 @@ export default function UploadsTab() {
           {uploads.map((upload) => (
             <div key={upload.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <img
-                src={`/api/uploads/image?url=${encodeURIComponent(upload.url)}`}
+                src={upload.url}
                 alt={upload.caption}
                 className="w-full h-32 object-cover"
               />
