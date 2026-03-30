@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { put, del } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 export async function GET() {
   const uploads = await prisma.upload.findMany({
@@ -13,13 +14,10 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
-    const caption = formData.get('caption') as string || '';
-    const category = formData.get('category') as string || 'general';
-    const notes = formData.get('notes') as string || '';
+    const body = await req.json();
+    const { file: base64Data, filename, caption = '', category = 'general', notes = '' } = body;
 
-    if (!file) {
+    if (!base64Data) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
@@ -28,18 +26,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Blob storage not configured. Set BLOB_READ_WRITE_TOKEN in Vercel env vars.' }, { status: 500 });
     }
 
-    // Sanitize filename: remove special chars, spaces, and ensure valid extension
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    // Extract the binary data from the base64 data URL
+    const base64 = base64Data.split(',')[1];
+    const buffer = Buffer.from(base64, 'base64');
+
+    // Determine content type from data URL
+    const contentType = base64Data.split(';')[0].split(':')[1] || 'image/jpeg';
+
+    const ext = filename?.split('.').pop()?.toLowerCase() || 'jpg';
     const safeName = `upload-${Date.now()}.${ext}`;
 
-    const blob = await put(safeName, file, {
+    const blob = await put(safeName, buffer, {
       access: 'private',
       token,
+      contentType,
     });
 
     const upload = await prisma.upload.create({
       data: {
-        filename: file.name,
+        filename: filename || safeName,
         url: blob.url,
         caption,
         category,
@@ -52,8 +57,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       error: error.message || 'Upload failed',
       name: error.name,
-      code: error.code,
-      stack: error.stack?.split('\n').slice(0, 3).join('\n'),
     }, { status: 500 });
   }
 }
