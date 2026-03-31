@@ -61,3 +61,13 @@ export interface TrackerStatus {
   label: string;
   color: 'red' | 'yellow' | 'green' | 'gray';
 }
+
+export interface GroceryItemType {
+  id: string;
+  name: string;
+  quantity: string;
+  category: string;
+  checked: boolean;
+  sortOrder: number;
+  createdAt: string;
+}

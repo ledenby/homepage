@@ -118,3 +118,13 @@ model Upload {
   notes       String   @default("")
   createdAt   DateTime @default(now())
 }
+
+model GroceryItem {
+  id        String   @id @default(cuid())
+  name      String
+  quantity  String   @default("")
+  category  String   @default("other")
+  checked   Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
