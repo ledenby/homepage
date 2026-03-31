@@ -59,33 +59,18 @@ export async function GET(req: NextRequest) {
       await prisma.urgentItem.create({ data: item });
     }
 
-    // School Events
+    // School Events — PFISD 2025-2026 district calendar
+    // Note: Highland Park & Caldwell specific events should be added
+    // manually via the School tab's "+ Add" button once you have real dates
     const schoolEvents = [
-      { dateDisplay: 'Mar 2', eventText: 'Texas Independence Day — school holiday', source: 'PFISD', type: 'event', sortKey: '2026-03-02' },
-      { dateDisplay: 'Mar 6', eventText: 'End of 4th six weeks', source: 'PFISD', type: 'info', sortKey: '2026-03-06' },
-      { dateDisplay: 'Mar 9-13', eventText: 'Spring Break — no school', source: 'PFISD', type: 'event', sortKey: '2026-03-09' },
-      { dateDisplay: 'Mar 16', eventText: 'Classes resume', source: 'PFISD', type: 'info', sortKey: '2026-03-16' },
-      { dateDisplay: 'Mar 20', eventText: 'Report cards available', source: 'PFISD', type: 'action', sortKey: '2026-03-20' },
-      { dateDisplay: 'Mar 27', eventText: 'Caldwell Pre-K spirit day — pajama day', source: 'Caldwell', type: 'event', sortKey: '2026-03-27' },
-      { dateDisplay: 'Mar 31', eventText: 'Highland Park book fair begins', source: 'Highland Park', type: 'event', sortKey: '2026-03-31' },
-      { dateDisplay: 'Apr 2', eventText: 'Highland Park parent-teacher conferences', source: 'Highland Park', type: 'action', sortKey: '2026-04-02' },
-      { dateDisplay: 'Apr 3', eventText: 'Caldwell Pre-K spring pictures', source: 'Caldwell', type: 'action', sortKey: '2026-04-03' },
-      { dateDisplay: 'Apr 7', eventText: 'STAAR testing begins (Highland Park)', source: 'Highland Park', type: 'info', sortKey: '2026-04-07' },
-      { dateDisplay: 'Apr 10', eventText: 'Caldwell Pre-K field trip permission slips due', source: 'Caldwell', type: 'action', sortKey: '2026-04-10' },
-      { dateDisplay: 'Apr 14', eventText: 'Highland Park book fair ends', source: 'Highland Park', type: 'event', sortKey: '2026-04-14' },
+      { dateDisplay: 'Apr 3', eventText: 'Student holiday / Staff development', source: 'PFISD', type: 'event', sortKey: '2026-04-03' },
+      { dateDisplay: 'Apr 7', eventText: 'STAAR testing window opens', source: 'PFISD', type: 'info', sortKey: '2026-04-07' },
       { dateDisplay: 'Apr 17', eventText: 'End of 5th six weeks', source: 'PFISD', type: 'info', sortKey: '2026-04-17' },
-      { dateDisplay: 'Apr 18', eventText: 'Student holiday / Staff development', source: 'PFISD', type: 'event', sortKey: '2026-04-18' },
-      { dateDisplay: 'Apr 21', eventText: 'Caldwell Pre-K field trip', source: 'Caldwell', type: 'event', sortKey: '2026-04-21' },
-      { dateDisplay: 'Apr 24', eventText: 'Report cards available', source: 'PFISD', type: 'action', sortKey: '2026-04-24' },
-      { dateDisplay: 'Apr 28', eventText: 'Teacher Appreciation Week begins', source: 'PFISD', type: 'event', sortKey: '2026-04-28' },
-      { dateDisplay: 'May 1', eventText: 'Highland Park talent show', source: 'Highland Park', type: 'event', sortKey: '2026-05-01' },
-      { dateDisplay: 'May 5', eventText: 'Caldwell Pre-K Mothers Day craft & tea', source: 'Caldwell', type: 'event', sortKey: '2026-05-05' },
-      { dateDisplay: 'May 8', eventText: 'Highland Park spring concert', source: 'Highland Park', type: 'event', sortKey: '2026-05-08' },
-      { dateDisplay: 'May 15', eventText: 'Caldwell Pre-K graduation ceremony', source: 'Caldwell', type: 'event', sortKey: '2026-05-15' },
-      { dateDisplay: 'May 22', eventText: 'Last day of school — early release', source: 'PFISD', type: 'event', sortKey: '2026-05-22' },
-      { dateDisplay: 'May 25', eventText: 'Memorial Day', source: 'PFISD', type: 'info', sortKey: '2026-05-25' },
-      { dateDisplay: 'May 26', eventText: 'Teacher work day (no students)', source: 'PFISD', type: 'info', sortKey: '2026-05-26' },
-      { dateDisplay: 'May 29', eventText: 'End of 6th six weeks / Final report cards', source: 'PFISD', type: 'action', sortKey: '2026-05-29' },
+      { dateDisplay: 'May 4', eventText: 'Teacher Appreciation Week begins', source: 'PFISD', type: 'event', sortKey: '2026-05-04' },
+      { dateDisplay: 'May 25', eventText: 'Memorial Day — no school', source: 'PFISD', type: 'event', sortKey: '2026-05-25' },
+      { dateDisplay: 'May 28', eventText: 'Last day of school — early release', source: 'PFISD', type: 'event', sortKey: '2026-05-28' },
+      { dateDisplay: 'May 29', eventText: 'Teacher work day (no students)', source: 'PFISD', type: 'info', sortKey: '2026-05-29' },
+      { dateDisplay: 'Jun 5', eventText: 'Report cards available', source: 'PFISD', type: 'action', sortKey: '2026-06-05' },
     ];
 
     for (const event of schoolEvents) {
