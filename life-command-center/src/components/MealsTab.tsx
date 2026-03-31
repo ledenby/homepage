@@ -57,7 +57,19 @@ export default function MealsTab() {
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
   const [selectedStore, setSelectedStore] = useState(STORES[0].id);
+  const [toast, setToast] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2500);
+  };
+
+  const copyList = async (itemsToCopy: GroceryItemType[]) => {
+    const text = itemsToCopy.map(i => i.quantity ? `${i.name} (${i.quantity})` : i.name).join('\n');
+    await navigator.clipboard.writeText(text);
+    showToast('List copied to clipboard!');
+  };
 
   const fetchItems = async () => {
     const res = await fetch('/api/grocery');
@@ -115,6 +127,8 @@ export default function MealsTab() {
   const storeLabel = STORES.find(s => s.id === selectedStore)?.label ?? '';
 
   if (loading) return <div className="p-4 text-center text-gray-400 font-body text-sm">Loading…</div>;
+
+
 
   return (
     <div className="space-y-4">
@@ -216,19 +230,33 @@ export default function MealsTab() {
         </div>
       )}
 
-      {/* Instacart button */}
-      {items.length > 0 && (
-        <a
-          href={instacartStoreUrl(selectedStore)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#43B02A] text-white text-sm font-body font-semibold py-3 rounded-xl shadow-sm hover:bg-[#3a9a24] transition-colors"
-        >
-          <span>Shop {storeLabel} on Instacart</span>
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
+      {/* Bottom actions */}
+      {unchecked.length > 0 && (
+        <div className="space-y-2">
+          {/* Copy + open Instacart */}
+          <button
+            onClick={async () => {
+              await copyList(unchecked);
+              window.open(instacartStoreUrl(selectedStore), '_blank');
+            }}
+            className="flex items-center justify-center gap-2 w-full bg-[#43B02A] text-white text-sm font-body font-semibold py-3 rounded-xl shadow-sm active:bg-[#3a9a24] transition-colors"
+          >
+            <span>Copy list &amp; open {storeLabel} on Instacart</span>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+          <p className="text-center font-body text-xs text-gray-400">
+            Copies your list, then paste it into Instacart's search
+          </p>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-navy text-white text-xs font-body font-medium px-4 py-2 rounded-full shadow-lg z-50 whitespace-nowrap">
+          {toast}
+        </div>
       )}
     </div>
   );
@@ -269,17 +297,16 @@ function GroceryRow({
         )}
       </span>
 
-      <a
-        href={instacartSearchUrl(storeId, item.name)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-300 hover:text-[#43B02A] transition-colors flex-shrink-0"
-        title={`Search "${item.name}" on Instacart`}
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </a>
+      {!item.checked && (
+        <a
+          href={instacartSearchUrl(storeId, item.name)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0 bg-[#43B02A]/10 text-[#43B02A] text-xs font-body font-semibold px-2 py-1 rounded-lg active:bg-[#43B02A]/20"
+        >
+          Search
+        </a>
+      )}
 
       <button
         onClick={onDelete}
