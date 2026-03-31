@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const safeName = `uploads/upload-${Date.now()}.${ext}`;
 
     const blob = await put(safeName, buffer, {
-      access: 'public',
+      access: 'private',
       token,
       contentType: file.type || 'image/jpeg',
     });
