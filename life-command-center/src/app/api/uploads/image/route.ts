@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { head } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
 
