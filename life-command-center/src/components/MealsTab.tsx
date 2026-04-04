@@ -1,294 +1,314 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { GroceryItemType } from '@/types';
+import { useState, useEffect } from 'react';
 
-const STORES = [
-  { id: 'h-e-b', label: 'HEB' },
-  { id: 'target', label: 'Target' },
-  { id: 'randalls', label: "Randall's" },
-  { id: 'aldi', label: 'Aldi' },
-];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
+const STORAGE_KEY = 'lcc-meal-plan';
+const GROCERY_KEY = 'lcc-grocery-list';
 
-const CATEGORIES = [
-  { id: 'produce', label: 'Produce', icon: '🥦' },
-  { id: 'dairy', label: 'Dairy & Eggs', icon: '🥛' },
-  { id: 'meat', label: 'Meat & Seafood', icon: '🥩' },
-  { id: 'bakery', label: 'Bread & Bakery', icon: '🍞' },
-  { id: 'frozen', label: 'Frozen', icon: '🧊' },
-  { id: 'pantry', label: 'Pantry', icon: '🥫' },
-  { id: 'beverages', label: 'Beverages', icon: '🧃' },
-  { id: 'cleaning', label: 'Household', icon: '🧹' },
-  { id: 'other', label: 'Other', icon: '🛒' },
-];
+type MealPlan = Record<string, Record<string, string>>;
 
-const PRODUCE_KEYWORDS = ['apple', 'banana', 'orange', 'grape', 'berry', 'berries', 'lemon', 'lime', 'avocado', 'tomato', 'lettuce', 'spinach', 'kale', 'broccoli', 'carrot', 'onion', 'garlic', 'pepper', 'cucumber', 'zucchini', 'squash', 'potato', 'sweet potato', 'yam', 'mushroom', 'celery', 'asparagus', 'corn', 'pea', 'bean', 'mango', 'pineapple', 'watermelon', 'melon', 'peach', 'plum', 'pear', 'strawberry', 'blueberry', 'raspberry', 'cilantro', 'parsley', 'basil', 'herbs', 'salad', 'cabbage', 'cauliflower', 'jalapeño', 'serrano', 'ginger', 'scallion', 'green onion', 'shallot', 'radish', 'beet', 'artichoke'];
-const DAIRY_KEYWORDS = ['milk', 'cheese', 'yogurt', 'butter', 'egg', 'eggs', 'cream', 'sour cream', 'cottage cheese', 'ricotta', 'mozzarella', 'cheddar', 'parmesan', 'creamer', 'half and half', 'whipped cream', 'oat milk', 'almond milk', 'soy milk'];
-const MEAT_KEYWORDS = ['chicken', 'beef', 'pork', 'turkey', 'lamb', 'fish', 'salmon', 'tuna', 'shrimp', 'tilapia', 'cod', 'steak', 'ground beef', 'ground turkey', 'bacon', 'sausage', 'ham', 'deli', 'rotisserie', 'wings', 'thighs', 'breast', 'ribs', 'brisket', 'seafood', 'crab', 'lobster', 'scallop'];
-const BAKERY_KEYWORDS = ['bread', 'bagel', 'muffin', 'tortilla', 'roll', 'bun', 'croissant', 'pita', 'naan', 'wrap', 'loaf', 'english muffin', 'biscuit', 'cracker'];
-const FROZEN_KEYWORDS = ['frozen', 'ice cream', 'gelato', 'sorbet', 'frozen pizza', 'frozen meal', 'frozen vegetable', 'edamame', 'waffle', 'tater tot'];
-const BEVERAGE_KEYWORDS = ['juice', 'soda', 'water', 'sparkling', 'coffee', 'tea', 'lemonade', 'sports drink', 'energy drink', 'beer', 'wine', 'kombucha', 'coconut water', 'broth', 'stock'];
-const CLEANING_KEYWORDS = ['soap', 'detergent', 'cleaner', 'bleach', 'paper towel', 'toilet paper', 'tissue', 'trash bag', 'plastic bag', 'zip lock', 'foil', 'saran wrap', 'dish', 'laundry', 'fabric softener', 'sponge', 'mop', 'broom', 'wipe', 'lysol', 'febreze', 'dryer sheet'];
-const PANTRY_KEYWORDS = ['pasta', 'rice', 'quinoa', 'oat', 'cereal', 'flour', 'sugar', 'salt', 'pepper', 'oil', 'vinegar', 'sauce', 'salsa', 'ketchup', 'mustard', 'mayo', 'hot sauce', 'soy sauce', 'ranch', 'dressing', 'canned', 'can of', 'jar of', 'bean', 'lentil', 'chickpea', 'peanut butter', 'jelly', 'jam', 'honey', 'maple syrup', 'syrup', 'chip', 'cracker', 'popcorn', 'pretzel', 'cookie', 'granola', 'protein bar', 'nut', 'almond', 'cashew', 'walnut', 'pecan', 'sunflower', 'pumpkin seed', 'chocolate', 'candy', 'gummy', 'spice', 'seasoning', 'cumin', 'paprika', 'oregano', 'thyme', 'rosemary', 'bay leaf', 'baking powder', 'baking soda', 'vanilla', 'cocoa', 'yeast', 'breadcrumb', 'panko', 'cornstarch', 'soup', 'broth', 'tomato paste'];
-
-function guessCategory(name: string): string {
-  const lower = name.toLowerCase();
-  if (PRODUCE_KEYWORDS.some(k => lower.includes(k))) return 'produce';
-  if (DAIRY_KEYWORDS.some(k => lower.includes(k))) return 'dairy';
-  if (MEAT_KEYWORDS.some(k => lower.includes(k))) return 'meat';
-  if (BAKERY_KEYWORDS.some(k => lower.includes(k))) return 'bakery';
-  if (FROZEN_KEYWORDS.some(k => lower.includes(k))) return 'frozen';
-  if (BEVERAGE_KEYWORDS.some(k => lower.includes(k))) return 'beverages';
-  if (CLEANING_KEYWORDS.some(k => lower.includes(k))) return 'cleaning';
-  if (PANTRY_KEYWORDS.some(k => lower.includes(k))) return 'pantry';
-  return 'other';
-}
-
-function instacartSearchUrl(storeId: string, query: string): string {
-  return `https://www.instacart.com/store/${storeId}/search_v3/${encodeURIComponent(query)}`;
-}
-
-function instacartStoreUrl(storeId: string): string {
-  return `https://www.instacart.com/store/${storeId}/storefront`;
+interface GroceryItem {
+  id: string;
+  text: string;
+  checked: boolean;
 }
 
 export default function MealsTab() {
-  const [items, setItems] = useState<GroceryItemType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [input, setInput] = useState('');
-  const [selectedStore, setSelectedStore] = useState(STORES[0].id);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [mealPlan, setMealPlan] = useState<MealPlan>({});
+  const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
+  const [newItem, setNewItem] = useState('');
+  const [editingCell, setEditingCell] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [activeSection, setActiveSection] = useState<'plan' | 'grocery'>('plan');
+  const [copied, setCopied] = useState(false);
 
-  const fetchItems = async () => {
-    const res = await fetch('/api/grocery');
-    const data = await res.json();
-    setItems(data);
-    setLoading(false);
+  // Load from localStorage
+  useEffect(() => {
+    const savedPlan = localStorage.getItem(STORAGE_KEY);
+    if (savedPlan) setMealPlan(JSON.parse(savedPlan));
+    const savedGrocery = localStorage.getItem(GROCERY_KEY);
+    if (savedGrocery) setGroceryItems(JSON.parse(savedGrocery));
+  }, []);
+
+  const savePlan = (plan: MealPlan) => {
+    setMealPlan(plan);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
   };
 
-  useEffect(() => { fetchItems(); }, []);
-
-  const addItem = async () => {
-    const trimmed = input.trim();
-    if (!trimmed) return;
-    setInput('');
-    const category = guessCategory(trimmed);
-    await fetch('/api/grocery', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: trimmed, category }),
-    });
-    fetchItems();
-    inputRef.current?.focus();
+  const saveGrocery = (items: GroceryItem[]) => {
+    setGroceryItems(items);
+    localStorage.setItem(GROCERY_KEY, JSON.stringify(items));
   };
 
-  const toggleCheck = async (item: GroceryItemType) => {
-    setItems(prev => prev.map(i => i.id === item.id ? { ...i, checked: !i.checked } : i));
-    await fetch('/api/grocery', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: item.id, checked: !item.checked }),
-    });
-    fetchItems();
+  const startEdit = (day: string, meal: string) => {
+    const key = `${day}-${meal}`;
+    setEditingCell(key);
+    setEditValue(mealPlan[day]?.[meal] || '');
   };
 
-  const deleteItem = async (id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id));
-    await fetch(`/api/grocery?id=${id}`, { method: 'DELETE' });
+  const saveEdit = (day: string, meal: string) => {
+    const updated = { ...mealPlan };
+    if (!updated[day]) updated[day] = {};
+    updated[day][meal] = editValue;
+    savePlan(updated);
+    setEditingCell(null);
   };
 
-  const clearChecked = async () => {
-    setItems(prev => prev.filter(i => !i.checked));
-    await fetch('/api/grocery', { method: 'DELETE' });
+  const clearPlan = () => {
+    if (!confirm('Clear the entire meal plan?')) return;
+    savePlan({});
   };
 
-  const unchecked = items.filter(i => !i.checked);
-  const checked = items.filter(i => i.checked);
-  const checkedCount = checked.length;
+  const addGroceryItem = () => {
+    if (!newItem.trim()) return;
+    const items = [...groceryItems, { id: Date.now().toString(), text: newItem.trim(), checked: false }];
+    saveGrocery(items);
+    setNewItem('');
+  };
 
-  // Group unchecked by category
-  const grouped = CATEGORIES.map(cat => ({
-    ...cat,
-    items: unchecked.filter(i => i.category === cat.id),
-  })).filter(g => g.items.length > 0);
+  const toggleGroceryItem = (id: string) => {
+    const items = groceryItems.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item
+    );
+    saveGrocery(items);
+  };
 
-  const storeLabel = STORES.find(s => s.id === selectedStore)?.label ?? '';
+  const deleteGroceryItem = (id: string) => {
+    saveGrocery(groceryItems.filter((item) => item.id !== id));
+  };
 
-  if (loading) return <div className="p-4 text-center text-gray-400 font-body text-sm">Loading…</div>;
+  const clearChecked = () => {
+    saveGrocery(groceryItems.filter((item) => !item.checked));
+  };
+
+  const copyGroceryList = async () => {
+    const uncheckedItems = groceryItems
+      .filter((item) => !item.checked)
+      .map((item) => `• ${item.text}`)
+      .join('\n');
+
+    if (!uncheckedItems) {
+      alert('No items to copy');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(uncheckedItems);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for iOS Safari
+      const textarea = document.createElement('textarea');
+      textarea.value = uncheckedItems;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const uncheckedCount = groceryItems.filter((i) => !i.checked).length;
+  const checkedCount = groceryItems.filter((i) => i.checked).length;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between px-1">
-        <h2 className="font-heading text-lg font-bold text-navy">Grocery List</h2>
-        {checkedCount > 0 && (
-          <button
-            onClick={clearChecked}
-            className="text-xs text-gray-400 hover:text-red-400 font-body"
-          >
-            Clear {checkedCount} checked
-          </button>
-        )}
-      </div>
+      <h2 className="font-heading text-lg font-bold text-navy px-1">Meal Planning</h2>
 
-      {/* Store picker */}
-      <div className="flex gap-2">
-        {STORES.map(store => (
-          <button
-            key={store.id}
-            onClick={() => setSelectedStore(store.id)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-body font-medium transition-colors ${
-              selectedStore === store.id
-                ? 'bg-coral text-white'
-                : 'bg-white text-gray-500 shadow-sm hover:text-navy'
-            }`}
-          >
-            {store.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Add item input */}
-      <div className="flex gap-2">
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && addItem()}
-          placeholder="Add item…"
-          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm font-body bg-white shadow-sm focus:outline-none focus:border-coral"
-        />
+      {/* Section Toggle */}
+      <div className="flex gap-2 px-1">
         <button
-          onClick={addItem}
-          disabled={!input.trim()}
-          className="bg-coral text-white text-sm px-4 py-2 rounded-xl font-body font-medium disabled:opacity-40"
+          onClick={() => setActiveSection('plan')}
+          className={`text-sm font-body font-medium px-3 py-1.5 rounded-full transition-colors ${
+            activeSection === 'plan' ? 'bg-coral text-white' : 'bg-gray-100 text-gray-500'
+          }`}
         >
-          Add
+          📅 Weekly Plan
+        </button>
+        <button
+          onClick={() => setActiveSection('grocery')}
+          className={`text-sm font-body font-medium px-3 py-1.5 rounded-full transition-colors ${
+            activeSection === 'grocery' ? 'bg-coral text-white' : 'bg-gray-100 text-gray-500'
+          }`}
+        >
+          🛒 Grocery List {uncheckedCount > 0 && `(${uncheckedCount})`}
         </button>
       </div>
 
-      {/* Grocery list */}
-      {items.length === 0 ? (
-        <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <p className="text-3xl mb-2">🛒</p>
-          <p className="font-body text-sm text-gray-400">Your list is empty. Add items above.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {grouped.map(group => (
-            <div key={group.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center gap-1.5">
-                <span className="text-sm">{group.icon}</span>
-                <span className="font-body text-xs font-semibold text-gray-500 uppercase tracking-wider">{group.label}</span>
-              </div>
-              <div className="divide-y divide-gray-50">
-                {group.items.map(item => (
-                  <GroceryRow
-                    key={item.id}
-                    item={item}
-                    storeId={selectedStore}
-                    onToggle={() => toggleCheck(item)}
-                    onDelete={() => deleteItem(item.id)}
-                  />
-                ))}
+      {/* Weekly Meal Plan */}
+      {activeSection === 'plan' && (
+        <div className="space-y-2">
+          <div className="flex justify-end px-1">
+            <button onClick={clearPlan} className="text-xs text-gray-400 hover:text-red-400 font-body">
+              Clear all
+            </button>
+          </div>
+          {DAYS.map((day) => (
+            <div key={day} className="bg-white rounded-xl p-3 shadow-sm">
+              <p className="font-body font-semibold text-navy text-sm mb-2">{day}</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {MEAL_TYPES.map((meal) => {
+                  const key = `${day}-${meal}`;
+                  const value = mealPlan[day]?.[meal] || '';
+                  const isEditing = editingCell === key;
+
+                  return (
+                    <div key={meal}>
+                      {isEditing ? (
+                        <input
+                          autoFocus
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={() => saveEdit(day, meal)}
+                          onKeyDown={(e) => e.key === 'Enter' && saveEdit(day, meal)}
+                          placeholder={meal}
+                          className="w-full border border-coral rounded px-2 py-1 text-xs font-body"
+                        />
+                      ) : (
+                        <button
+                          onClick={() => startEdit(day, meal)}
+                          className={`w-full text-left px-2 py-1 rounded text-xs font-body transition-colors ${
+                            value
+                              ? 'bg-emerald-50 text-emerald-800'
+                              : 'bg-gray-50 text-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          <span className="text-[10px] text-gray-400 uppercase">{meal}: </span>
+                          {value || 'tap to add'}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
+        </div>
+      )}
 
-          {checkedCount > 0 && (
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden opacity-60">
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-100 flex items-center gap-1.5">
-                <span className="font-body text-xs font-semibold text-gray-400 uppercase tracking-wider">Checked off</span>
-              </div>
-              <div className="divide-y divide-gray-50">
-                {checked.map(item => (
-                  <GroceryRow
-                    key={item.id}
-                    item={item}
-                    storeId={selectedStore}
-                    onToggle={() => toggleCheck(item)}
-                    onDelete={() => deleteItem(item.id)}
-                  />
+      {/* Grocery List */}
+      {activeSection === 'grocery' && (
+        <div className="space-y-3">
+          {/* Add Item */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Add item (e.g. chicken breast)"
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addGroceryItem()}
+              className="flex-1 border rounded-lg px-3 py-2 text-sm font-body"
+            />
+            <button
+              onClick={addGroceryItem}
+              disabled={!newItem.trim()}
+              className="bg-coral text-white text-sm px-4 py-2 rounded-lg font-body font-medium disabled:opacity-50"
+            >
+              Add
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          {groceryItems.length > 0 && (
+            <div className="flex gap-2 px-1">
+              <button
+                onClick={copyGroceryList}
+                className="text-xs font-body font-medium text-coral hover:text-coral/80 flex items-center gap-1"
+              >
+                {copied ? (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    Copy list
+                  </>
+                )}
+              </button>
+              {checkedCount > 0 && (
+                <button
+                  onClick={clearChecked}
+                  className="text-xs font-body text-gray-400 hover:text-red-400 ml-auto"
+                >
+                  Clear {checkedCount} checked
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Items */}
+          {groceryItems.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <p className="text-3xl mb-2">🛒</p>
+              <p className="font-body text-sm">Your grocery list is empty.</p>
+              <p className="font-body text-xs mt-1">Add items above, then tap &ldquo;Copy list&rdquo; to paste into any app.</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {groceryItems
+                .filter((i) => !i.checked)
+                .map((item) => (
+                  <div key={item.id} className="bg-white rounded-lg p-2.5 shadow-sm flex items-center gap-2">
+                    <button
+                      onClick={() => toggleGroceryItem(item.id)}
+                      className="w-5 h-5 border-2 border-gray-300 rounded flex-shrink-0 hover:border-coral transition-colors"
+                    />
+                    <span className="font-body text-sm text-navy flex-1">{item.text}</span>
+                    <button
+                      onClick={() => deleteGroceryItem(item.id)}
+                      className="text-gray-300 hover:text-red-400 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 ))}
-              </div>
+              {/* Checked items */}
+              {checkedCount > 0 && (
+                <div className="pt-2 space-y-1">
+                  <p className="text-xs text-gray-400 font-body px-1">Checked off</p>
+                  {groceryItems
+                    .filter((i) => i.checked)
+                    .map((item) => (
+                      <div key={item.id} className="bg-gray-50 rounded-lg p-2.5 flex items-center gap-2 opacity-60">
+                        <button
+                          onClick={() => toggleGroceryItem(item.id)}
+                          className="w-5 h-5 border-2 border-emerald-400 bg-emerald-100 rounded flex-shrink-0 flex items-center justify-center"
+                        >
+                          <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+                        <span className="font-body text-sm text-gray-400 flex-1 line-through">{item.text}</span>
+                        <button
+                          onClick={() => deleteGroceryItem(item.id)}
+                          className="text-gray-300 hover:text-red-400 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
-
-      {/* Instacart button */}
-      {items.length > 0 && (
-        <a
-          href={instacartStoreUrl(selectedStore)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#43B02A] text-white text-sm font-body font-semibold py-3 rounded-xl shadow-sm hover:bg-[#3a9a24] transition-colors"
-        >
-          <span>Shop {storeLabel} on Instacart</span>
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
-      )}
-    </div>
-  );
-}
-
-function GroceryRow({
-  item,
-  storeId,
-  onToggle,
-  onDelete,
-}: {
-  item: GroceryItemType;
-  storeId: string;
-  onToggle: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <div className="flex items-center gap-3 px-3 py-2.5">
-      <button
-        onClick={onToggle}
-        className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-          item.checked
-            ? 'bg-emerald-400 border-emerald-400'
-            : 'border-gray-300 hover:border-coral'
-        }`}
-      >
-        {item.checked && (
-          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </button>
-
-      <span className={`flex-1 font-body text-sm ${item.checked ? 'line-through text-gray-300' : 'text-navy'}`}>
-        {item.name}
-        {item.quantity && (
-          <span className="text-gray-400 ml-1 text-xs">({item.quantity})</span>
-        )}
-      </span>
-
-      <a
-        href={instacartSearchUrl(storeId, item.name)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-gray-300 hover:text-[#43B02A] transition-colors flex-shrink-0"
-        title={`Search "${item.name}" on Instacart`}
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </a>
-
-      <button
-        onClick={onDelete}
-        className="text-gray-200 hover:text-red-400 transition-colors flex-shrink-0"
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
     </div>
   );
 }
