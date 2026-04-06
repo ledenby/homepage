@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch the private blob using the token
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
