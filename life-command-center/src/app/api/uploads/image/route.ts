@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { head } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +14,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch the private blob using the token
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
