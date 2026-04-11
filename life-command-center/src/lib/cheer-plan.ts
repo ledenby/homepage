@@ -1,278 +1,343 @@
-export interface CheerDrill {
-  text: string;
-  surface?: string;
-  isMilestone?: boolean;
-}
-
-export interface CheerDayTemplate {
-  dayOfWeek: string;
-  label: string;
-  type: 'bwo' | 'fwo' | 'combo' | 'rest' | 'gym' | 'fun';
-  duration: string;
-  drills: CheerDrill[];
-}
-
-export interface CheerPhase {
-  phaseNumber: number;
-  title: string;
-  skill: string;
-  moveOnWhen: string;
-  days: CheerDayTemplate[];
-  notes?: string[];
-}
-
-export interface GlossaryEntry {
+export interface DrillBlock {
   name: string;
-  family: string;
-  surfaces: string[];
-  howTo: string[];
-  looksRight: string[];
-  watchFor: string[];
-  youtube: string;
+  time: string;
+  detail: string;
 }
 
-export interface MilestoneItem {
-  phase: number;
-  text: string;
+export interface TrainingDay {
+  name: string;
+  focus: string;
+  time: string;
+  blocks: DrillBlock[];
 }
 
-export const cheerPlan = {
-  name: 'Tumbling Mastery Plan',
-  subtitle: '6 Skills \u2022 No Rush \u2022 Real Results',
-  skills: [
-    'Backbend (standing down to bridge)',
-    'Back Walkover (backbend that flows into a kickover)',
-    'Front Walkover (forward through handstand to bridge to stand)',
-    'Round-Off (cartwheel with a snap-down ending)',
-    'Cartwheel-Back Walkover (connecting two skills in one pass)',
-    'Valdez (back walkover from a seated position)',
-  ],
-  weeklyStructure: [
-    { day: 'Monday', desc: 'Back walkover track (15-20 min at home)' },
-    { day: 'Tuesday', desc: 'Front walkover + round-off track (15-20 min at home)' },
-    { day: 'Wednesday', desc: 'Combo day \u2014 whatever she\'s excited about (15 min at home)' },
-    { day: 'Thursday', desc: 'Cheer practice (coached)' },
-    { day: 'Friday', desc: 'Fun day \u2014 trampoline drills + anything she wants to show off (15 min)' },
-    { day: 'Saturday', desc: 'Rest' },
-    { day: 'Sunday', desc: 'Tumbling class (coached)' },
-  ],
-  equipment: ['Tumble Mat', 'Barrel', 'Cheese Mat', 'Trampoline'],
-  phases: [
+export interface DevWeek {
+  range: string;
+  title: string;
+  sessions: string;
+  goal: string;
+  drills: string[];
+  checkpoint: string;
+}
+
+export interface Milestone {
+  skill: string;
+  status: string;
+  competition: string;
+  icon: string;
+}
+
+export interface EngagementRule {
+  rule: string;
+  detail: string;
+  icon: string;
+}
+
+export const TRYOUT_PHASE = {
+  label: 'Phase 1',
+  title: 'Tryout Optimization',
+  duration: '2 Weeks',
+  icon: '⚡',
+  philosophy:
+    "Don't chase new skills. Make everything she has look competition-clean while signaling stunt readiness and coachability.",
+  days: [
     {
-      phaseNumber: 1,
-      title: 'BACKBEND',
-      skill: 'Standing down to a bridge. This IS the first half of the back walkover.',
-      moveOnWhen: 'She can stand, arch backward, and place her hands on the floor in a bridge with straight arms \u2014 with only a fingertip guide from you.',
-      notes: [
-        '\u26A0\uFE0F Fear Management: Going backward is the #1 fear barrier. NEVER rush it. If she hesitates, go back to wall walk-downs. The trampoline helps because it feels like play, not training.',
-      ],
-      days: [
+      name: 'Days 1 & 3',
+      focus: 'Technique Polish + Presentation',
+      time: '35 min',
+      blocks: [
         {
-          dayOfWeek: 'Monday', label: 'BWO Track', type: 'bwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Bridge push-up from floor \u2014 hold 20 sec x 5' },
-            { text: 'Bridge rocks \u2014 10 x 3 sets on tumble mat' },
-            { text: 'Barrel back arch \u2014 drape over barrel, hands to floor, hold 10 sec x 5' },
-            { text: 'Wall walk-down to bridge \u2014 5 reps (panel or tumble mat at base)' },
-            { text: 'Wall walk back up \u2014 5 reps' },
-            { text: 'Wall walk-down to the LOWEST point possible \u2014 try to get hands to floor' },
-            { text: 'Spotted backbend to bridge \u2014 your hands on her back, guiding her down' },
-            { text: 'Spotted backbend with fingertip guide only' },
-          ],
+          name: 'Warm-Up Game',
+          time: '5 min',
+          detail:
+            'Shipwreck or Freeze Dance — skip, gallop, bear crawl, crab walk. Change commands every 15–20 sec.',
         },
         {
-          dayOfWeek: 'Tuesday', label: 'FWO + RO Track', type: 'fwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Line cartwheels \u2014 10 reps on grass (tape or rope)' },
-            { text: 'Handstand against wall \u2014 hold 20 sec x 3' },
-            { text: 'Front limber attempts on barrel \u2014 kick to handstand, arch over barrel, land feet together x 5' },
-          ],
+          name: 'Dynamic Flexibility',
+          time: '5 min',
+          detail:
+            'Leg swings (10/leg), arm circles → overhead reaches, walking lunges with arms up, inchworms across floor.',
         },
         {
-          dayOfWeek: 'Wednesday', label: 'Combo / Her Choice', type: 'combo' as const, duration: '15 min',
-          drills: [
-            { text: 'Whatever she\'s working on that she\'s excited about' },
-            { text: 'Mix of her best drills + 2-3 attempts at her hardest current skill' },
-          ],
+          name: 'Cartwheel Block',
+          time: '8 min',
+          detail:
+            '3 cartwheels/round with one cue each: (1) point toes hard, (2) lock legs like steel, (3) finish in perfect lunge. Then cartwheel challenge on a line.',
         },
         {
-          dayOfWeek: 'Friday', label: 'Trampoline + Fun', type: 'fun' as const, duration: '15 min',
-          drills: [
-            { text: 'Backbend on trampoline \u2014 the bounce makes going backward less scary' },
-            { text: 'Handstands on trampoline' },
-            { text: 'Backward roll on trampoline' },
-            { text: 'Whatever she wants to show off' },
-          ],
+          name: 'Bridge + Body Tension',
+          time: '7 min',
+          detail:
+            "3 bridge push-ups with 5-sec holds. 2 one-leg bridges (15 sec each). 20-sec hollow body → 20-sec superman → 20-sec plank. Frame as 'Gymnastics Shapes Challenge.'",
+        },
+        {
+          name: 'Performance Practice',
+          time: '5 min',
+          detail:
+            'Perform cartwheel + forward roll like judges are watching. Cue smile, eye contact, sharp arms, pointed toes. Build a mini routine: 3 cartwheels + roll in sequence.',
+        },
+        {
+          name: 'Flexibility Cooldown',
+          time: '5 min',
+          detail:
+            'Seated straddle, butterfly, kneeling lunge (30 sec/side), arms-overhead shoulder stretch, prayer stretch.',
         },
       ],
     },
     {
-      phaseNumber: 2,
-      title: 'BACK WALKOVER',
-      skill: 'A backbend that flows directly into a kickover without stopping. The signature Level 1 skill.',
-      moveOnWhen: 'She can do an independent BWO on the tumble mat \u2014 3 in a row, no spot, straight arms, clean finish.',
-      days: [
+      name: 'Days 2 & 4',
+      focus: 'Strength Foundation + Round-Off Intro',
+      time: '35 min',
+      blocks: [
         {
-          dayOfWeek: 'Monday', label: 'BWO Track', type: 'bwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Barrel-assisted kickover \u2014 drape over barrel, kick over x 5' },
-            { text: 'Cheese mat kickover \u2014 elevated bridge kickover x 5' },
-            { text: 'Flat bridge kickover on tumble mat x 10' },
-            { text: '5 flat bridge kickovers in a row', isMilestone: true },
-            { text: 'Wall walk-down + immediate kickover (no pause in bridge) x 5' },
-            { text: 'Spotted backbend + immediate kickover (full spot) x 5' },
-            { text: 'Spotted BWO \u2014 fingertip guide x 5' },
-            { text: 'Spotted BWO \u2014 hovering hands (no touch) x 3' },
-            { text: 'SOLO BWO on tumble mat x 3' },
-            { text: 'Solo BWO on grass x 3' },
-            { text: '3 clean BWOs on tumble mat, no spot', isMilestone: true },
-          ],
+          name: 'Warm-Up Game',
+          time: '5 min',
+          detail:
+            'Obstacle course relay: forward roll, jump block, bear walk, wall handstand 5 sec, crab walk back. Race her own time.',
         },
         {
-          dayOfWeek: 'Tuesday', label: 'FWO + RO Track', type: 'fwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Cartwheels \u2014 split at the top, pointed toes' },
-            { text: 'T-Cartwheels (hands turned sideways) \u2014 round-off hand placement' },
-            { text: 'Handstand kick-ups against wall' },
-            { text: 'Front limber on barrel \u2192 then on tumble mat' },
-          ],
+          name: 'Wrist + Shoulder',
+          time: '5 min',
+          detail:
+            'Palm-flat kneeling rocks (10), back-of-hand rocks (8), fist rocks (8), wrist circles (10 each). Wall slides for shoulders (10 reps). Non-negotiable for her size.',
         },
         {
-          dayOfWeek: 'Friday', label: 'Trampoline + Fun', type: 'fun' as const, duration: '15 min',
-          drills: [
-            { text: 'BWO on trampoline \u2014 the bounce makes it so much easier' },
-            { text: 'Back walkover attempts on trampoline for confidence reps' },
-            { text: 'Handstand snap-down on trampoline (round-off prep)' },
-          ],
-        },
-      ],
-    },
-    {
-      phaseNumber: 3,
-      title: 'FRONT WALKOVER + ROUND-OFF',
-      skill: 'Now she has a BWO. These two skills work in parallel \u2014 front walkover on Mondays, round-off on Tuesdays.',
-      moveOnWhen: 'Independent front walkover on tumble mat AND clean round-off with rebound on grass.',
-      days: [
-        {
-          dayOfWeek: 'Monday', label: 'Front Walkover Track', type: 'bwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'BWO warm-up \u2014 5 reps' },
-            { text: 'Front limber on barrel \u2014 kick to handstand, arch over, land both feet x 5' },
-            { text: 'Front limber on tumble mat (no barrel) x 5' },
-            { text: 'Front walkover \u2014 split the legs, lead foot lands first x 5' },
-            { text: 'Push hips forward to stand up without hands touching the ground' },
-            { text: '3 clean front walkovers on tumble mat', isMilestone: true },
-          ],
+          name: 'Round-Off Intro',
+          time: '8 min',
+          detail:
+            "Power hurdle lunge drill (10 reps). Needle kicks from lunge (5/leg). Handstand snap-down ('superhero landing'). 2–3 slow round-offs on line — form only, no power.",
         },
         {
-          dayOfWeek: 'Tuesday', label: 'Round-Off Track', type: 'fwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Hurdle drill \u2014 2-3 running steps into a powerful skip-lunge x 10 on grass' },
-            { text: 'T-Cartwheel \u2014 cartwheel with hands turned sideways x 10 on grass' },
-            { text: 'Snap-down from handstand \u2014 BOTH feet hit ground at same time x 10 on tumble mat' },
-            { text: 'Snap-down on cheese mat \u2014 incline helps feel the snap x 5' },
-            { text: 'Full round-off on grass \u2014 hurdle + turned hands + snap-down x 5' },
-            { text: 'Round-off + rebound finish (bounce up, arms overhead) x 5' },
-            { text: '3 clean round-offs in a row, straight line, feet together, rebound', isMilestone: true },
-          ],
+          name: 'Strength Circuit',
+          time: '8 min',
+          detail:
+            "'Boot Camp' stations rotating 60 sec: wall handstand, hollow rocks, squat jumps, bridge with shoulder rocks, single-leg balance eyes closed. Music on. 3 rounds.",
         },
         {
-          dayOfWeek: 'Friday', label: 'Trampoline + Fun', type: 'fun' as const, duration: '15 min',
-          drills: [
-            { text: 'Front walkover on trampoline' },
-            { text: 'Round-off on trampoline (the bounce amplifies the snap-down feel)' },
-            { text: 'BWO reps on trampoline for maintenance' },
-          ],
+          name: 'Skill Integration',
+          time: '4 min',
+          detail:
+            'Full tryout sim: best cartwheel → forward roll → round-off attempt. Coach gives 1 correction. Run again with fix applied. Practices coachability.',
+        },
+        {
+          name: 'Flexibility Cooldown',
+          time: '5 min',
+          detail:
+            'Same as Days 1/3. Add prone shoulder press (20 sec). Kneeling lunge with overhead arm (opens anterior chain).',
         },
       ],
     },
     {
-      phaseNumber: 4,
-      title: 'CARTWHEEL-BACK WALKOVER',
-      skill: 'Connecting two skills into one tumbling pass. A Level 1 cheer combination that shows coordination and flow.',
-      moveOnWhen: 'Smooth cartwheel-BWO with no pause or extra steps between skills.',
-      notes: [
-        '\uD83D\uDCA1 Which Leg?: The leg that lands SECOND in the cartwheel becomes the leg that lifts FIRST in the BWO. If she cartwheels right, her left leg lands last and kicks into the BWO. This should feel natural \u2014 don\'t overthink it.',
-      ],
-      days: [
+      name: 'Day 5',
+      focus: 'Fun Day + Mock Tryout',
+      time: '40 min',
+      blocks: [
         {
-          dayOfWeek: 'Monday', label: 'Combo Track', type: 'bwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Cartwheel to lunge, pause, then BWO \u2014 getting used to the sequence x 5' },
-            { text: 'Cartwheel to BWO with shorter pause x 5' },
-            { text: 'Cartwheel to BWO \u2014 no pause, one continuous motion x 5' },
-            { text: 'Cartwheel-BWO on tumble mat x 5' },
-            { text: 'Cartwheel-BWO on grass x 3' },
-            { text: '3 smooth cartwheel-BWOs with no stop between skills', isMilestone: true },
-          ],
+          name: 'Game Warm-Up',
+          time: '7 min',
+          detail:
+            'Skill Memory Add-On: start with forward roll, add cartwheel, add jump — building a sequence she must remember and perform each round.',
         },
         {
-          dayOfWeek: 'Tuesday', label: 'Bonus Combos', type: 'fwo' as const, duration: '15-20 min',
-          drills: [
-            { text: 'Front walkover-cartwheel combo (another Level 1 pass)' },
-            { text: 'BWO-BWO (back walkover switch leg \u2014 two in a row)' },
-          ],
+          name: 'Mock Tryout',
+          time: '15 min',
+          detail:
+            'Full simulation: tumbling eval, jump eval (tuck jump + straight jump), 8-count choreo learned on the spot, coachability test (3 corrections → check application).',
         },
-      ],
-    },
-    {
-      phaseNumber: 5,
-      title: 'VALDEZ',
-      skill: 'A back walkover that starts from a SITTING position. The coolest skill on this list. Also the hardest.',
-      moveOnWhen: 'Clean Valdez on tumble mat \u2014 push up from seated, arch back, full walkover, stand.',
-      notes: [
-        '\uD83C\uDFAF Realistic Timeline: The Valdez is an end-of-year goal. She needs a rock-solid BWO first. Once she has that, the Valdez progression takes 4-8 weeks of focused work. Don\'t introduce it until Phases 1-3 are complete.',
-      ],
-      days: [
         {
-          dayOfWeek: 'Monday', label: 'Valdez Track', type: 'bwo' as const, duration: '20-25 min',
-          drills: [
-            { text: 'Seated bridge \u2014 from sitting, push hips up to a bridge position x 5' },
-            { text: 'Seated bridge on cheese mat (incline helps hips rise) x 5' },
-            { text: 'Seated bridge + kickover from cheese mat x 5' },
-            { text: 'One-leg seated push-up drill \u2014 sit, one leg bent, push hips as HIGH as possible x 10 each side' },
-            { text: 'Elevated Valdez \u2014 sit on a raised surface (stack of mats, couch edge), go back into BWO x 5' },
-            { text: 'Spotted Valdez on floor \u2014 support her lower back as she pushes up and arches back x 5' },
-            { text: 'BWO from high front scale (leg held high before going back) \u2014 this trains the Valdez timing x 5' },
-            { text: 'Solo Valdez on tumble mat x 3' },
-            { text: 'Clean Valdez on tumble mat', isMilestone: true },
-          ],
+          name: 'Flexibility + Bridge',
+          time: '8 min',
+          detail:
+            "Full splits both sides + center, bridge holds → bridge rocks, wall walk-downs ('spider training'). This is Phase 2 prep disguised as Phase 1 flexibility.",
+        },
+        {
+          name: 'Free Choice + Cooldown',
+          time: '10 min',
+          detail:
+            "She picks her favorite drill or game from the week. Positive reinforcement. Static stretching. Talk about what she's proud of.",
         },
       ],
     },
-  ] as CheerPhase[],
-  milestones: [
-    { phase: 1, text: 'Bridge from floor \u2014 straight arms, 20 sec hold' },
-    { phase: 1, text: 'Bridge rocks \u2014 shoulders past wrists' },
-    { phase: 1, text: 'Barrel back arch \u2014 hands flat on floor, comfortable' },
-    { phase: 1, text: 'Wall walk-down \u2014 hands reach the floor' },
-    { phase: 1, text: 'Wall walk-up \u2014 back to standing' },
-    { phase: 1, text: 'BACKBEND with fingertip spot \u2014 standing to bridge' },
-    { phase: 2, text: 'Barrel kickover x 5' },
-    { phase: 2, text: 'Cheese mat kickover x 5' },
-    { phase: 2, text: 'Flat bridge kickover x 5 in a row' },
-    { phase: 2, text: 'Wall walk-down + kickover combo' },
-    { phase: 2, text: 'Spotted BWO \u2014 full spot' },
-    { phase: 2, text: 'Spotted BWO \u2014 fingertip guide' },
-    { phase: 2, text: 'Spotted BWO \u2014 hovering hands' },
-    { phase: 2, text: 'SOLO BWO on tumble mat x 3 in a row' },
-    { phase: 2, text: 'Solo BWO on grass' },
-    { phase: 3, text: 'Front limber on barrel' },
-    { phase: 3, text: 'Front limber on tumble mat' },
-    { phase: 3, text: 'Front walkover on tumble mat x 3' },
-    { phase: 3, text: 'Hurdle drill \u2014 powerful and consistent' },
-    { phase: 3, text: 'T-Cartwheel \u2014 hands turned' },
-    { phase: 3, text: 'Snap-down \u2014 both feet together' },
-    { phase: 3, text: 'Full round-off \u2014 straight line, rebound x 3' },
-    { phase: 4, text: 'Cartwheel + pause + BWO' },
-    { phase: 4, text: 'Cartwheel-BWO \u2014 shorter pause' },
-    { phase: 4, text: 'CARTWHEEL-BWO \u2014 no pause, continuous' },
-    { phase: 4, text: 'Cartwheel-BWO on grass' },
-    { phase: 5, text: 'Seated bridge \u2014 hips high' },
-    { phase: 5, text: 'Seated bridge + kickover from cheese mat' },
-    { phase: 5, text: 'Elevated Valdez from raised surface' },
-    { phase: 5, text: 'Spotted Valdez on floor' },
-    { phase: 5, text: 'BWO from high front scale' },
-    { phase: 5, text: 'SOLO VALDEZ on tumble mat' },
-  ] as MilestoneItem[],
+  ] as TrainingDay[],
 };
+
+export const DEV_PHASE = {
+  label: 'Phase 2',
+  title: 'Skill Development',
+  duration: 'Weeks 3–10',
+  icon: '🚀',
+  philosophy:
+    "Now we build. Progress is gated by readiness — no stage advances until checkpoints are met. Her height means she stays on elevated surfaces longer, and that's by design.",
+  weeks: [
+    {
+      range: 'Weeks 3–4',
+      title: 'Foundation Lock-In',
+      sessions: '4x/week',
+      goal: 'Bulletproof bridge mechanics + begin elevated kickover',
+      drills: [
+        'Bridge push-ups × 5 with 5-sec holds, bridge rocks × 8, one-leg bridge holds × 15 sec each',
+        'Elevated kickover: feet on 24–36" surface, coach spots. 3–5 attempts/session. Keep surface high for success every time',
+        'Strength: wall handstand holds → 30 sec, hollow body → 30 sec, 10 squat jumps, 10 leg lifts/side',
+        'Flexibility: shoulder work (elbow bridges, prone presses, wall slides), hip flexor stretches, splits both sides',
+      ],
+      checkpoint:
+        'Bridge hold 30 sec with straight arms. Bridge rocks show shoulder shift past hands. One-leg bridge free leg past 45°. 3 successful spotted kickovers from elevation.',
+    },
+    {
+      range: 'Weeks 5–6',
+      title: 'Kickover Progression + Front Walkover Prep',
+      sessions: '4–5x/week',
+      goal: 'Reduce kickover elevation toward floor; begin handstand & front limber',
+      drills: [
+        'Systematically lower surface: large box → small box → stacked panel mats. 3 clean kickovers at each height before progressing',
+        'Front walkover prep: wall handstand kick-ups, handstand → bridge lower, handstand → bridge → stand-up sequence',
+        'Round-off: 2–3 per session. Hurdle entry, hand placement, 2-foot landing, controlled rebound',
+        'Strength: pike push-ups, active split holds (standing, lift leg to max, hold 10 sec/side)',
+      ],
+      checkpoint:
+        'Consistent kickovers from panel mat height (~8–12") with minimal spot. Beginning floor-level kickover with spot. Wall handstand 20+ sec.',
+    },
+    {
+      range: 'Weeks 7–8',
+      title: 'Floor Kickover + Standing Backbend',
+      sessions: '5x/week',
+      goal: 'Floor bridge kickover; wall walk-downs to bridge; first spotted front walkovers',
+      drills: [
+        'Floor kickover: from single panel mat → floor. Coach spots at lower back. If blocked, identify cause (shoulder push vs tight splits)',
+        'Standing backbend: wall walk-downs (start close, increase distance). Spotted backbends. Confidence ladder: walk-down → hands to floor → spotted → decreasing spot',
+        'Front walkover: from elevated surface, kick through handstand, arch over, land one foot at a time. Spot at hips',
+        'Conditioning: hollow body 30 sec, bridge push-ups × 5, wall handstand 30 sec, banded leg lifts 10/side',
+      ],
+      checkpoint:
+        'Floor bridge kickover with light spot or independent. Wall walk-down with hands to floor. At least 1 spotted standing backbend. Front limber consistent.',
+    },
+    {
+      range: 'Weeks 9–10',
+      title: 'Back Walkover + Connections',
+      sessions: '5x/week',
+      goal: 'First spotted back walkovers; front walkover independence; cartwheel → BWO connection',
+      drills: [
+        'Back walkover: full spotted attempts. Cues: lead leg kicks straight, split wide, ride the arc, finish tall in lunge. Reduce to fingertip → hover spot',
+        'Front walkover: working toward unassisted from floor. Focus on foot placement close to hands and hip drive forward',
+        'Connection work: cartwheel → pause in lunge → back walkover (spotted). Pause decreases over sessions',
+        'Round-off consistency: 3–5/session. Hurdle + 2-foot landing should be locked in. Work on rebound quality',
+      ],
+      checkpoint:
+        'Spotted back walkover with decreasing assistance. Front walkover independent or near-independent. Round-off consistent with clean form.',
+    },
+  ] as DevWeek[],
+};
+
+export const MILESTONES: Milestone[] = [
+  {
+    skill: 'Bridge kickover (floor)',
+    status: 'Independent or light spot',
+    competition: 'Can be added to routine',
+    icon: '🌉',
+  },
+  {
+    skill: 'Standing backbend',
+    status: 'Consistent with decreasing spot',
+    competition: 'Not yet comp-ready',
+    icon: '🔙',
+  },
+  {
+    skill: 'Standing back walkover',
+    status: 'Spotted, possibly light-spot',
+    competition: 'Mid-season addition',
+    icon: '⭐',
+  },
+  {
+    skill: 'Front walkover',
+    status: 'Independent or light spot',
+    competition: 'Possible routine addition',
+    icon: '🌟',
+  },
+  {
+    skill: 'Round-off',
+    status: 'Consistent with clean form',
+    competition: 'Comp-ready by week 8–10',
+    icon: '🔄',
+  },
+  {
+    skill: 'Cartwheel → BWO',
+    status: 'Beginning with spot',
+    competition: 'Late-season goal',
+    icon: '🔗',
+  },
+  {
+    skill: 'Valdez',
+    status: 'Preliminary drills only',
+    competition: 'Not this season',
+    icon: '💫',
+  },
+];
+
+export const TRYOUT_TIPS = {
+  showcase: [
+    'Beautiful cartwheels on a line — pointed toes, locked legs, confident lunge finish',
+    'Strong held bridge (shows flexibility + strength visually)',
+    'Controlled forward roll with tight tuck and clean stand-up',
+    'Round-off only if controlled — a shaky one hurts more than skipping it',
+    'Sharp arm motions, genuine energy, immediate correction application',
+  ],
+  between: [
+    'Apply every correction immediately (strongest coachability signal)',
+    'Eye contact with evaluators',
+    'Encourage other athletes genuinely',
+    'Maintain energy even as others fatigue',
+    'Willingness to try any stunt position',
+  ],
+  avoid: [
+    'Attempting unmastered skills (sloppy BWO attempt < no attempt)',
+    'Showing fear — say "I\'m working on that" with confidence',
+    'Losing energy between stations',
+  ],
+};
+
+export const ENGAGEMENT: EngagementRule[] = [
+  {
+    rule: '5-Minute Rotation',
+    detail:
+      'No drill exceeds 5–8 min. When attention drops, change activity immediately.',
+    icon: '🔄',
+  },
+  {
+    rule: 'Game Framing',
+    detail:
+      'Hollow holds = astronaut training. Wall handstands = spider walks. Wrist conditioning = ninja hand exercises.',
+    icon: '🎮',
+  },
+  {
+    rule: 'Self-Competition',
+    detail:
+      'Time her planks, count consecutive cartwheels, track personal records on a visible chart.',
+    icon: '🏆',
+  },
+  {
+    rule: 'Music Always',
+    detail:
+      'Let her choose the playlist. Music during conditioning increases effort and enjoyment.',
+    icon: '🎵',
+  },
+  {
+    rule: 'Choice Principle',
+    detail:
+      '"Bridges first or cartwheels first?" Perceived autonomy increases engagement.',
+    icon: '🎯',
+  },
+  {
+    rule: 'End on a High',
+    detail:
+      'Final 5 min is always her favorite activity. Positive memory = eagerness to return.',
+    icon: '✨',
+  },
+];
+
+export const HEIGHT_TIPS = [
+  'Stay on elevated surfaces longer in all kickover progressions — longer levers make floor-level skills proportionally harder',
+  'Wrist conditioning every session, non-negotiable — growth plate injuries are most likely during rapid growth',
+  'Allow slightly wider hand/foot placement during learning phases',
+  "Don't compare her timeline with smaller peers — same skill may take 2–3× longer but technique will be stronger",
+  'Emphasize shoulder + core conditioning before introducing new weight-bearing skills',
+];
